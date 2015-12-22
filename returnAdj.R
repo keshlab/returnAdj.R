@@ -1,5 +1,3 @@
-library(Hmisc)
-
 # returnAdj returns a data.frame with values adjusted for designated covariates. It takes
 # the following parameters:
 # - data: The overarching data.frame
