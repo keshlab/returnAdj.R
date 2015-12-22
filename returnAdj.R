@@ -31,7 +31,7 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), id='SUBJID', d
   if(length(interacts)>0) {
     interStr <- interacts[1]
     for(interact in interacts) {
-      if(all.is.numeric(data[,interact])) data[interact] <- scale(data[interact])
+      if(is.numeric(data[,interact])) data[interact] <- scale(data[interact])
       if(interact != interacts[1]) interStr <- paste(interStr,'*',interact)
     }
   }
@@ -39,7 +39,7 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), id='SUBJID', d
   
   covarStr <- covars[1]
   for(covar in covars) {
-    if(all.is.numeric(data[,covar])) data[covar] <- scale(data[covar])
+    if(is.numeric(data[,covar])) data[covar] <- scale(data[covar])
     if(covar != covars[1]) covarStr <- paste(covarStr,'+',covar)
   }
   
