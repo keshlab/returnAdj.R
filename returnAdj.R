@@ -4,7 +4,6 @@
 # - measnames: A vector holding the names of the measures of interest
 # - covars: A vector holding the names of the covariates to be used (but not in an interaction term)
 # - interacts: A vector holding the names of covariates to be used in an interaction term
-# - id: A string identifying the variable holding IDs. This defaults to 'SUBJID'
 # - display: A boolean indicating that the original-adjusted value correlations
 #       are to be printed. This defaults to true.
 # - groups: A vector of strings identifying the variables holding the grouping information
@@ -16,7 +15,7 @@
 # Unfortunately, the way that returnAdj presently works, FACTORS CANNOT BE NUMERIC. Sorry
 # for the inconvenience.
 
-returnAdj <- function(data, measnames, covars=c(), interacts=c(), id='SUBJID', display=T, groups=NULL) {
+returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, groups=NULL) {
   
   # "Sanity checks"
   if(length(c(covars,interacts))==0) {
@@ -40,13 +39,15 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), id='SUBJID', d
     if(is.numeric(data[,covar])) data[covar] <- scale(data[covar])
     if(covar != covars[1]) covarStr <- paste(covarStr,'+',covar)
   }
-  
-  rownames(data) <- data[,id]
-  data.new <- as.data.frame(data[,id]); names(data.new) <- id
+
+data.new <- data.frame(matrix(nrow=nrow(data), ncol=length(measnames)))
+col_counter <- 1
   for(meas in measnames) {
     mod <- lm(paste(meas,'~',interStr,covarStr),data=data)
-    data.new[meas] <- merge(data.new[id],mod$residuals+mod$coefficients[1],by.x=1,by.y=0,all.x=T)[,2]
+		names(data.new)[col_counter] <- meas
+    data.new[, col_counter] <- mod$residuals+mod$coefficients[1]
     if(display) print(paste0(paste(meas,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[meas],data.new[meas]))[1,2],digits=4)))
+		col_counter = col_counter + 1
   }
   if(!is.null(groups)) for(group in groups) data.new[group] <- data[group]
   
