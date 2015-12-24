@@ -6,16 +6,12 @@
 # - interacts: A vector holding the names of covariates to be used in an interaction term
 # - display: A boolean indicating that the original-adjusted value correlations
 #       are to be printed. This defaults to true.
-# - groups: A vector of strings identifying the variables holding the grouping information
-#       in the data.frame data. If a variable is designated, then it will be included
-#       in data.adj. Otherwise, as is the default, no grouping information will be
-#       included.
 #
 #
 # Unfortunately, the way that returnAdj presently works, FACTORS CANNOT BE NUMERIC. Sorry
 # for the inconvenience.
 
-returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, groups=NULL) {
+returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F) {
   
   # "Sanity checks"
   if(length(c(covars,interacts))==0) {
@@ -49,7 +45,6 @@ col_counter <- 1
     if(display) print(paste0(paste(meas,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[meas],data.new[meas]))[1,2],digits=4)))
 		col_counter = col_counter + 1
   }
-  if(!is.null(groups)) for(group in groups) data.new[group] <- data[group]
   
   return(data.new)
 }
