@@ -7,7 +7,7 @@ the following parameters:
 - measnames: A vector holding the names of the measures of interest               
 - covars: A vector holding the names of the covariates to be used (but not in an interaction term)                                                                    
 - interacts: A vector holding the names of covariates to be used in an interaction term                                                                               
-- id: A string identifying the variable holding IDs. This defaults to 'SUBJID'    
+- ~~id: A string identifying the variable holding IDs. This defaults to 'SUBJID'~~    
 - display: A boolean indicating that the original-adjusted value correlations     
       are to be printed. This defaults to true.                                   
 - ~~groups: A vector of strings identifying the variables holding the grouping information                                                                              
