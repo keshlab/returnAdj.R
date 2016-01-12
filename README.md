@@ -4,7 +4,7 @@ Legendary R function to return a data.frame with values adjusted for covariates
 returnAdj returns a data.frame with values adjusted for designated covariates. It takes                                                                               
 the following parameters:                                                         
 - data: The overarching data.frame                                                
-- measnames: A vector holding the names of the measures of interest               
+- measure: A string for the name of the vector to be adjusted
 - covars: A vector holding the names of the covariates to be used (but not in an interaction term)                                                                    
 - interacts: A vector holding the names of covariates to be used in an interaction term                                                                               
 - display: A boolean indicating that the original-adjusted value correlations     

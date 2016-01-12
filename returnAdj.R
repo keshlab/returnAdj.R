@@ -1,7 +1,7 @@
 # returnAdj returns a data.frame with values adjusted for designated covariates. It takes
 # the following parameters:
 # - data: The overarching data.frame
-# - measnames: A vector holding the names of the measures of interest
+# - measure: A string for the name of the vector to be adjusted
 # - covars: A vector holding the names of the covariates to be used (but not in an interaction term)
 # - interacts: A vector holding the names of covariates to be used in an interaction term
 # - display: A boolean indicating that the original-adjusted value correlations
@@ -15,7 +15,7 @@
 # Unfortunately, the way that returnAdj presently works, FACTORS CANNOT BE NUMERIC. Sorry
 # for the inconvenience.
 
-returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, method='smean', subset=NULL)  {
+returnAdj <- function(data, measure, covars=c(), interacts=c(), display=F, method='smean', subset=NULL)  {
   
   # "Sanity checks"
   if(length(c(covars,interacts))==0) {
@@ -48,21 +48,14 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, met
     if(covar != covars[1]) covarStr <- paste(covarStr,'+',covar)  
   }
   
-	# "Initialize empty output
-  data.new <- data.frame(matrix(nrow=nrow(data), ncol=length(measnames)))   
-  col_counter <- 1
- 
- # "Apply adjustment for each input measure"	
-  for(meas in measnames) {
-    mod <- lm(paste(meas,'~',interStr,covarStr),data=data[r, ])
-		mod.residuals <- data[, meas] - predict.lm(mod, data)
-    names(data.new)[col_counter] <- meas
-    if(method=='iadj') data.new[, col_counter] <- mod.residuals+mod$coefficients[1]
-    if(method=='smean') data.new[,col_counter] <- mod.residuals+mean(data[,meas])
-    if(method=='null') data.new[,col_counter] <- mod.residuals
-    if(display) print(paste0(paste(meas,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[meas],data.new[meas]))[1,2],digits=4)))
-    col_counter = col_counter + 1
-  }
+ # "Apply adjustment"	
+    mod <- lm(paste(measure,'~',interStr,covarStr),data=data[r, ])
+		mod.residuals <- data[, measure] - predict.lm(mod, data)
+    if(method=='iadj') data.new <- mod.residuals + mod$coefficients[1]
+    if(method=='smean') data.new <- mod.residuals + mean(data[,measure])
+    if(method=='null') data.new <- mod.residuals
+    names(data.new) <- measure
+    if(display) print(paste0(paste(measure,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[measure],data.new[measure]))[1,2],digits=4)))
   
   
   return(data.new)
