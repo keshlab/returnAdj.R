@@ -9,12 +9,13 @@
 # - method: A string identifying the mean adjusting methods. This defaults to 'smean'. The other options include 'iadj' and 'null'.
 #           This feature provides you with the option to fetch sample means adjusted based on: Intercept adjusted (iadj), sample mean (smean) or 
 #           'null' adjusted.
+# - subset: A conditional expression that returns a vector of booleans the same length as the vector to be adjusted. This can be used to generate the model on only a subset of the data (e.g. Controls only)
 #
 #
 # Unfortunately, the way that returnAdj presently works, FACTORS CANNOT BE NUMERIC. Sorry
 # for the inconvenience.
 
-returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, method='smean') {
+returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, method='smean', subset=NULL)  {
   
   # "Sanity checks"
   if(length(c(covars,interacts))==0) {
@@ -22,7 +23,14 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, met
           returnAdj function.')
     break
   }
-  
+ # "Apply Subset if requested"	
+	if(is.null(subset)){
+		r <- rep(TRUE, nrow(data))
+	}
+	else{
+		r <- subset
+	}
+# "Build interaction string"
   interStr <- ''
   if(length(interacts)>0) {
     interStr <- interacts[1]
@@ -32,22 +40,26 @@ returnAdj <- function(data, measnames, covars=c(), interacts=c(), display=F, met
     }
   }
   if(interStr!='') interStr <- paste0(interStr,'+')
-  
+
+ # "Build covariate string" 
   covarStr <- covars[1]
   for(covar in covars) {
     if(is.numeric(data[,covar])) data[covar] <- scale(data[covar])  
     if(covar != covars[1]) covarStr <- paste(covarStr,'+',covar)  
   }
   
+	# "Initialize empty output
   data.new <- data.frame(matrix(nrow=nrow(data), ncol=length(measnames)))   
   col_counter <- 1
-  
+ 
+ # "Apply adjustment for each input measure"	
   for(meas in measnames) {
-    mod <- lm(paste(meas,'~',interStr,covarStr),data=data)
+    mod <- lm(paste(meas,'~',interStr,covarStr),data=data[r, ])
+		mod.residuals <- data[, meas] - predict.lm(mod, data)
     names(data.new)[col_counter] <- meas
-    if(method=='iadj') data.new[, col_counter] <- mod$residuals+mod$coefficients[1]
-    if(method=='smean') data.new[,col_counter] <- mod$residuals+mean(data[,meas])
-    if(method=='null') data.new[,col_counter] <- mod$residuals
+    if(method=='iadj') data.new[, col_counter] <- mod.residuals+mod$coefficients[1]
+    if(method=='smean') data.new[,col_counter] <- mod.residuals+mean(data[,meas])
+    if(method=='null') data.new[,col_counter] <- mod.residuals
     if(display) print(paste0(paste(meas,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[meas],data.new[meas]))[1,2],digits=4)))
     col_counter = col_counter + 1
   }
