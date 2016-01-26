@@ -52,7 +52,7 @@ returnAdj <- function(data, measure, covars=c(), interacts=c(), display=F, metho
     mod <- lm(paste(measure,'~',interStr,covarStr),data=data[r, ])
 		mod.residuals <- data[, measure] - predict.lm(mod, data)
     if(method=='iadj') data.new <- mod.residuals + mod$coefficients[1]
-    if(method=='smean') data.new <- mod.residuals + mean(data[,measure])
+    if(method=='smean') data.new <- mod.residuals + mean(data[,measure])#, na.rm = TRUE)
     if(method=='null') data.new <- mod.residuals
     names(data.new) <- measure
     if(display) print(paste0(paste(measure,'~',interStr,covarStr),': Orig-Adj r=',signif(cor(cbind(data[measure],data.new[measure]))[1,2],digits=4)))
